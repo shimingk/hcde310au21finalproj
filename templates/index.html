@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Weather</title>
+</head>
+<body>
+    <h1>Simple Weather</h1>
+    <form action="/" method="post">
+        <label for="place">Please enter the city:</label>
+        <input type="text" id="place" name="place" required/><br/>
+        <input type="submit" value="Enter" name="enterbtn"/>
+    </form>
+    {% if prompt %}
+    <div>{{prompt}}</div>
+    {% elif current_data and forecast and past_data %}
+    <h2>{{page_title}}</h2>
+    <section id="current">
+        <table>
+            <tr><td>Current Temperature: {{current_data['temp']}}<sup>o</sup>C</td></tr>
+            <tr><td>{{current_data['weather'][0]['main']}}</td></tr>
+            <tr><td><img src="http://openweathermap.org/img/wn/{{current_data['weather'][0]['icon']}}@2x.png"></td></tr>
+        </table>
+    </section>
+    <section id="forecast">
+        <h3>7-day Forecast</h3>
+        <table>
+            {% for day in forecast %}
+            <tr><td>{{day['dt']}}</td></tr>
+            <tr><td>Temperature: {{day['temp']['day']}}<sup>o</sup>C</td></tr>
+            <tr><td>{{day['weather'][0]['main']}}</td></tr>
+            <tr><td><img src="http://openweathermap.org/img/wn/{{day['weather'][0]['icon']}}@2x.png"></td></tr>
+            {% endfor %}
+        </table>
+    </section>
+    <section id="past">
+        <h3>Past 5-day Forecast</h3>
+        <table>
+            {% for day in past_data %}
+            <tr><td>{{day['dt']}}</td></tr>
+            <tr><td>Temperature: {{day['temp']}}<sup>o</sup>C</td></tr>
+            <tr><td>{{day['weather'][0]['main']}}</td></tr>
+            <tr><td><img src="http://openweathermap.org/img/wn/{{day['weather'][0]['icon']}}@2x.png"></td></tr>
+            {% endfor %}
+        </table>
+    </section>
+    {% endif %}
+</body>
+</html>
