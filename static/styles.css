@@ -1,3 +1,23 @@
-td {
+body {
+    background-color: #AAD2DE;
+    font-family: 'Open Sans', Arial, sans-serif;
+}
+
+body, td {
     text-align: center;
+}
+
+#current {
+    display: flex;
+    justify-content: center;
+}
+
+#err {
+    padding: 25px;
+    margin: 25px;
+}
+
+.data {
+    display: flex;
+    justify-content: space-evenly;
 }

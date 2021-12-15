@@ -127,7 +127,7 @@ def main_route():
         return render_template("index.html", page_title="Home")
 
 
-@app.route("/userinput")
+@app.route("/analysis")
 def input_route():
     pass
 

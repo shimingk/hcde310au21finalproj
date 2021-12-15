@@ -1,6 +1,7 @@
 # HCDE 310 Final Project - Simple Weather
 *I would like to use P3 of my final project for **HW7**!*
 
+This repository contains my P3 code for my Final Project - Simple Weather.
 ## APIs used in this project
 The two APIs I used in this project are:
 
