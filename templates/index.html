@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Simple Weather</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <h1>Simple Weather</h1>
@@ -17,30 +18,43 @@
     <h2>{{page_title}}</h2>
     <section id="current">
         <table>
+            <tr><td>Today: {{current_data['day']}} {{current_data['date']}}</td></tr>
             <tr><td>Current Temperature: {{current_data['temp']}}<sup>o</sup>C</td></tr>
             <tr><td>{{current_data['weather'][0]['main']}}</td></tr>
-            <tr><td><img src="http://openweathermap.org/img/wn/{{current_data['weather'][0]['icon']}}@2x.png"></td></tr>
+            <tr><td><img src="http://openweathermap.org/img/wn/{{current_data['weather'][0]['icon']}}@2x.png" alt="{{current_data['weather'][0]['main']}}" title="{{current_data['weather'][0]['main']}}"></td></tr>
         </table>
     </section>
     <section id="forecast">
         <h3>7-day Forecast</h3>
         <table>
+            <tr>
+                <th scope="col">Day</th>
+                <th scope="col">Temperature</th>
+                <th scope="col">Weather</th>
+            </tr>
             {% for day in forecast %}
-            <tr><td>{{day['dt']}}</td></tr>
-            <tr><td>Temperature: {{day['temp']['day']}}<sup>o</sup>C</td></tr>
-            <tr><td>{{day['weather'][0]['main']}}</td></tr>
-            <tr><td><img src="http://openweathermap.org/img/wn/{{day['weather'][0]['icon']}}@2x.png"></td></tr>
+            <tr>
+                <td>{{day['day']}} {{day['date']}}</td>
+                <td>{{day['temp']['day']}}<sup>o</sup>C</td>
+                <td><img src="http://openweathermap.org/img/wn/{{day['weather'][0]['icon']}}@2x.png" alt="{{day['weather'][0]['main']}}" title="{{day['weather'][0]['main']}}"></td>
+            </tr>
             {% endfor %}
         </table>
     </section>
     <section id="past">
         <h3>Past 5-day Forecast</h3>
         <table>
+            <tr>
+                <th scope="col">Day</th>
+                <th scope="col">Temperature</th>
+                <th scope="col">Weather</th>
+            </tr>
             {% for day in past_data %}
-            <tr><td>{{day['dt']}}</td></tr>
-            <tr><td>Temperature: {{day['temp']}}<sup>o</sup>C</td></tr>
-            <tr><td>{{day['weather'][0]['main']}}</td></tr>
-            <tr><td><img src="http://openweathermap.org/img/wn/{{day['weather'][0]['icon']}}@2x.png"></td></tr>
+            <tr>
+                <td>{{day['day']}} {{day['date']}}</td>
+                <td>{{day['temp']}}<sup>o</sup>C</td>
+                <td><img src="http://openweathermap.org/img/wn/{{day['weather'][0]['icon']}}@2x.png" alt="{{day['weather'][0]['main']}}" title="{{day['weather'][0]['main']}}"></td>
+            </tr>
             {% endfor %}
         </table>
     </section>

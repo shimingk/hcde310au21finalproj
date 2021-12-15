@@ -14,3 +14,5 @@ You will find the API keys I personally used for these APIs in `keys.py`
 
 - [Getting unix timestamp](https://pythonguides.com/convert-datetime-to-unix-timestamp-in-python/)
 - [Unix Timestamp Converter](https://www.unixtimestamp.com/index.php)
+- [Unix timestamp to Python DateTime](https://www.geeksforgeeks.org/how-to-convert-datetime-to-unix-timestamp-in-python/)
+- [Converting epoch time to day of the week](https://stackoverflow.com/questions/26232658/python-convert-epoch-time-to-day-of-the-week)

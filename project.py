@@ -28,10 +28,12 @@ def get_coordinates(city):
     params = {"appid": weather_key, "q": city}
     paramstr = urllib.parse.urlencode(params)
     req_weather_data = safe_get(base_url + paramstr)
-    print(base_url + paramstr)
-    weather_data = json.load(req_weather_data)
-    # print(weather_data)
-    return weather_data["coord"]["lat"], weather_data["coord"]["lon"]
+    if req_weather_data is None:
+        return None
+    else:
+        weather_data = json.load(req_weather_data)
+        # print(weather_data)
+        return weather_data["coord"]["lat"], weather_data["coord"]["lon"]
 
 
 def get_weather_data(coordinates):
@@ -49,6 +51,16 @@ def get_weather_data(coordinates):
 #     date = datetime.datetime.utcnow()
 #     utc_time = calendar.timegm(date.utctimetuple())
 #     return utc_time
+
+# Takes in a unix timestamp and returns its corresponding date formatted: MM-DD-YYYY
+def convert_time(dt):
+    date_time = datetime.datetime.fromtimestamp(dt)
+    return date_time.strftime('%m/%d/%y')
+
+
+# Takes in a unix timestamp and returns the day of the week
+def convert_day(dt):
+    return datetime.datetime.fromtimestamp(dt).strftime("%A")
 
 
 # Takes in the coordinates of city and the time of the past forecast data UTC
@@ -74,24 +86,33 @@ def main_route():
         app.logger.info(request.form.get("place"))
         name = request.form.get("place")
         # app.logger.info(name)
-        if name:
-            print("Processing the user's input")
+        if get_coordinates(name) is not None:
+            print("Processing the input data")
             location = get_coordinates(name)
             data = get_weather_data(location)
-            # print(current_timestamp())  # prints current unix timestamp
             # print(data.keys())  # keys: lat,lon,timezone,timezone-offset, current, daily
             print(data['current']['dt'])
             curr_time = data['current']['dt']
+            data['current']['date'] = convert_time(curr_time)
+            print(data['current']['date'])
+            data['current']['day'] = convert_day(curr_time)
+            print(data['current']['day'])
             past_data = []
             for day in range(5, 0, -1):
-                past_data.append(get_past_weather_data(location, curr_time - (day * 86400))['current'])
+                day_data = get_past_weather_data(location, curr_time - (day * 86400))['current']
+                day_data['date'] = convert_time(day_data['dt'])
+                day_data['day'] = convert_day(day_data['dt'])
+                past_data.append(day_data)
             print(past_data)
             print()
             print(len(data['current']))
             print(data['current'])
             print()
-            print(data['daily'])
+            # print(data['daily'])
             del data['daily'][0]
+            for day in data['daily']:
+                day['date'] = convert_time(day['dt'])
+                day['day'] = convert_day(day['dt'])
             if data is not None:
                 title = "Weather data for %s" % name
                 return render_template("index.html", page_title=title, current_data=data['current'],
@@ -101,7 +122,7 @@ def main_route():
                                        prompt="Oh no! API call was unsuccessful")
         else:
             return render_template("index.html", page_title="home",
-                                   prompt="Please enter the city you wish to see the weather")
+                                   prompt="City name invalid! Please try again")
     else:
         return render_template("index.html", page_title="Home")
 
