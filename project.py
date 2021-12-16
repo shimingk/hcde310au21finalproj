@@ -36,11 +36,11 @@ def get_coordinates(city):
         return weather_data["coord"]["lat"], weather_data["coord"]["lon"]
 
 
-def get_weather_data(coordinates):
+def get_weather_data(coordinates, units):
     baseurl = "https://api.openweathermap.org/data/2.5/onecall?"
     params = {
         "appid": weather_key, "lat": coordinates[0], "lon": coordinates[1],
-        "units": "metric", "exclude": "minutely,hourly", "lang": "en"
+        "units": units, "exclude": "minutely,hourly", "lang": "en"
     }
     paramstr = urllib.parse.urlencode(params)
     req = safe_get(baseurl + paramstr)
@@ -64,9 +64,9 @@ def convert_day(dt):
 
 
 # Takes in the coordinates of city and the time of the past forecast data UTC
-def get_past_weather_data(coordinates, dt):  # 1 day = 86400 seconds unix timestamp
+def get_past_weather_data(coordinates, units, dt):  # 1 day = 86400 seconds unix timestamp
     baseurl = "http://api.openweathermap.org/data/2.5/onecall/timemachine?"
-    params = {"appid": weather_key, "lat": coordinates[0], "lon": coordinates[1], "dt": dt, "units": "metric",
+    params = {"appid": weather_key, "lat": coordinates[0], "lon": coordinates[1], "dt": dt, "units": units,
               "lang": "en", "exclude": "hourly,minutely,daily"}
     paramstr = urllib.parse.urlencode(params)
     req_past_data = safe_get(baseurl + paramstr)
@@ -87,32 +87,39 @@ def main_route():
         name = request.form.get("place")
         # app.logger.info(name)
         if get_coordinates(name) is not None:
-            print("Processing the input data")
             location = get_coordinates(name)
-            data = get_weather_data(location)
-            # print(data.keys())  # keys: lat,lon,timezone,timezone-offset, current, daily
-            print(data['current']['dt'])
+            data = get_weather_data(location, "imperial")
+            altdata = get_weather_data(location, "metric")
+            data['current']['cel'] = get_weather_data(location, "metric")['current']['temp']
+            print('celsius:', data['current']['cel'])
             curr_time = data['current']['dt']
             data['current']['date'] = convert_time(curr_time)
-            print(data['current']['date'])
             data['current']['day'] = convert_day(curr_time)
             print(data['current']['day'])
             past_data = []
             for day in range(5, 0, -1):
-                day_data = get_past_weather_data(location, curr_time - (day * 86400))['current']
+                day_data = get_past_weather_data(location, "imperial", curr_time - (day * 86400))['current']
                 day_data['date'] = convert_time(day_data['dt'])
                 day_data['day'] = convert_day(day_data['dt'])
+                day_data['cel'] = get_past_weather_data(
+                    location, "metric", curr_time - (day * 86400))['current']['temp']
                 past_data.append(day_data)
-            print(past_data)
+            print(past_data[0])
             print()
             print(len(data['current']))
             print(data['current'])
             print()
-            # print(data['daily'])
             del data['daily'][0]
             for day in data['daily']:
                 day['date'] = convert_time(day['dt'])
                 day['day'] = convert_day(day['dt'])
+            del altdata['daily'][0]
+            for day in range(len(altdata['daily'])):
+                data['daily'][day]['cel'] = altdata['daily'][day]['temp']
+                print(data['daily'][day]['temp'])
+                print(data['daily'][day]['cel'])
+                print()
+            print(data['daily'])
             if data is not None:
                 title = "Weather data for %s" % name
                 return render_template("index.html", page_title=title, current_data=data['current'],
@@ -133,17 +140,13 @@ def input_route():
 
 
 def main():
-    print("-----")
     coordinates = get_coordinates("seaTTLe")
     print(coordinates[0], coordinates[1])
-    data = get_weather_data(coordinates)
+    data = get_weather_data(coordinates, "imperial")
     print(data.keys())
     print(data)
     # print(len((data["daily"][0])))
     # print(get_weather_icon(data["current"]["weather"][0]["icon"]))
-
-    # print()
-    # get_past_weather_data()
 
 
 if __name__ == "__main__":

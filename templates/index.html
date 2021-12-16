@@ -19,7 +19,7 @@
         <section id="current">
             <table>
                 <tr><td>Today: {{current_data['day']}} {{current_data['date']}}</td></tr>
-                <tr><td>Current Temperature: {{current_data['temp']}}<sup>o</sup>C</td></tr>
+                <tr><td class="temp">Current Temperature: <span>{{current_data['temp']}}</span><sup>o</sup><a class="units" onclick="toggleTemp()">F</a></td></tr>
                 <tr><td>{{current_data['weather'][0]['main']}}</td></tr>
                 <tr><td><img src="http://openweathermap.org/img/wn/{{current_data['weather'][0]['icon']}}@2x.png" alt="{{current_data['weather'][0]['main']}}" title="{{current_data['weather'][0]['main']}}"></td></tr>
             </table>
@@ -36,7 +36,7 @@
                     {% for day in forecast %}
                     <tr>
                         <td>{{day['day']}}<br>{{day['date']}}</td>
-                        <td>{{day['temp']['day']}}<sup>o</sup>C</td>
+                        <td class="temp"><span>{{day['temp']['day']}}</span><sup>o</sup><a class="units" onclick="toggleTemp()">F</a></td>
                         <td><img src="http://openweathermap.org/img/wn/{{day['weather'][0]['icon']}}@2x.png" alt="{{day['weather'][0]['main']}}" title="{{day['weather'][0]['main']}}"></td>
                     </tr>
                     {% endfor %}
@@ -53,13 +53,71 @@
                     {% for day in past_data %}
                     <tr>
                         <td>{{day['day']}}<br>{{day['date']}}</td>
-                        <td>{{day['temp']}}<sup>o</sup>C</td>
+                        <td class="temp"><span>{{day['temp']}}</span><sup>o</sup><a class="units" onclick="toggleTemp()">F</a></td>
                         <td><img src="http://openweathermap.org/img/wn/{{day['weather'][0]['icon']}}@2x.png" alt="{{day['weather'][0]['main']}}" title="{{day['weather'][0]['main']}}"></td>
                     </tr>
                     {% endfor %}
                 </table>
             </section>
         </div>
+    <script>
+        function select(selector) {
+            return document.querySelector(selector);
+        }
+
+        function selectAll(selector) {
+            return document.querySelectorAll(selector);
+        }
+
+        function id(name) {
+            return document.getElementById(name);
+        }
+
+        function toggleTemp() {
+            let temp = document.getElementsByClassName('units');
+            for (let i = 0; i < temp.length; i++) {
+                if (temp[i].innerHTML === "F") {
+                    temp[i].innerHTML = "C";
+                    toggleCurrent("C");
+                    toggleOthers("C");
+                } else {
+                    temp[i].innerHTML = "F";
+                    toggleCurrent("F");
+                    toggleOthers("F");
+                }
+            }
+        }
+
+        function toggleCurrent(units) {
+            data = selectAll("#current span");
+            if (units === "C") {
+                data[0].innerText = {{current_data['cel']}};
+            }
+            else {
+                data[0].innerText = {{current_data['temp']}};
+            }
+        }
+
+        function toggleOthers(units) {
+            forecastData = selectAll("#forecast span")
+            historicData = selectAll("#past span")
+            if (units === "C") {
+                {% for day in range(7) %}
+                forecastData[{{day}}].innerHTML = {{forecast[day]['cel']['day']}};
+                {% endfor %}
+                {% for day in range(5) %}
+                historicData[{{day}}].innerHTML = {{past_data[day]['cel']}};
+                {% endfor %}
+            } else {
+                {% for day in range(7) %}
+                forecastData[{{day}}].innerHTML = {{forecast[day]['temp']['day']}};
+                {% endfor %}
+                {% for day in range(5) %}
+                historicData[{{day}}].innerHTML = {{past_data[day]['temp']}};
+                {% endfor %}
+            }
+        }
+    </script>
         {% endif %}
     </body>
 </html>

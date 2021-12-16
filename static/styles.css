@@ -7,6 +7,12 @@ body, td {
     text-align: center;
 }
 
+.units:hover {
+    cursor: pointer;
+    outline-style: groove;
+    outline-color: aquamarine;
+}
+
 #current {
     display: flex;
     justify-content: center;
