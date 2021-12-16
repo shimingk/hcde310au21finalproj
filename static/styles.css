@@ -18,6 +18,11 @@ body, td {
     justify-content: center;
 }
 
+#current table {
+    padding: 25px;
+    margin: 5px;
+}
+
 #err {
     padding: 25px;
     margin: 25px;

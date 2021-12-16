@@ -23,6 +23,9 @@
                 <tr><td>{{current_data['weather'][0]['main']}}</td></tr>
                 <tr><td><img src="http://openweathermap.org/img/wn/{{current_data['weather'][0]['icon']}}@2x.png" alt="{{current_data['weather'][0]['main']}}" title="{{current_data['weather'][0]['main']}}"></td></tr>
             </table>
+            {% if img %}
+            <a><img src="{{img['photos'][0]['src']['tiny']}}" alt="{{img['photos'][0]['alt']}}"></a>
+            {% endif %}
         </section>
         <div class="data">
             <section id="forecast">

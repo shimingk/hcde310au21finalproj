@@ -9,7 +9,7 @@ from keys import weather_key, pxl_key
 app = Flask(__name__)
 
 
-# the safe_get function from class
+# the safe_get function from class to make API calls
 def safe_get(url):
     try:
         return urllib.request.urlopen(url)
@@ -36,6 +36,8 @@ def get_coordinates(city):
         return weather_data["coord"]["lat"], weather_data["coord"]["lon"]
 
 
+# Takes in the coordinates and preferred units (for temperatures) of a location
+# Returns a json containing the weather data for that location
 def get_weather_data(coordinates, units):
     baseurl = "https://api.openweathermap.org/data/2.5/onecall?"
     params = {
@@ -79,6 +81,18 @@ def get_weather_icon(icon):
     return url % icon
 
 
+# Takes in the city name and returns a json containing an image of the city from Pexel
+def get_city_img(city):
+    url = "https://api.pexels.com/v1/search?query=%s&per_page=1" % city
+    header = {"Authorization": pxl_key}
+    try:
+        return requests.get(url, headers=header).json()
+    except requests.exceptions.RequestException as e:
+        print("Request cannot be fulfilled")
+        print(e)
+    return None
+
+
 @app.route("/", methods=["GET", "POST"])
 def main_route():
     app.logger.info("In main route")
@@ -91,7 +105,7 @@ def main_route():
             data = get_weather_data(location, "imperial")
             altdata = get_weather_data(location, "metric")
             data['current']['cel'] = get_weather_data(location, "metric")['current']['temp']
-            print('celsius:', data['current']['cel'])
+            # print('celsius:', data['current']['cel'])
             curr_time = data['current']['dt']
             data['current']['date'] = convert_time(curr_time)
             data['current']['day'] = convert_day(curr_time)
@@ -116,12 +130,15 @@ def main_route():
             del altdata['daily'][0]
             for day in range(len(altdata['daily'])):
                 data['daily'][day]['cel'] = altdata['daily'][day]['temp']
-                print(data['daily'][day]['temp'])
-                print(data['daily'][day]['cel'])
-                print()
-            print(data['daily'])
-            if data is not None:
-                title = "Weather data for %s" % name
+            img_dt = get_city_img(name)
+            # print(img_dt)
+            # print(img_dt.keys())
+            # print(data['daily'])
+            title = "Weather data for %s" % name
+            if (data is not None) & (img_dt is not None):
+                return render_template("index.html", page_title=title, current_data=data['current'],
+                                       forecast=data['daily'], past_data=past_data, img=img_dt)
+            elif data is not None:
                 return render_template("index.html", page_title=title, current_data=data['current'],
                                        forecast=data['daily'], past_data=past_data)
             else:
