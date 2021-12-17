@@ -24,7 +24,10 @@
                 <tr><td><img src="http://openweathermap.org/img/wn/{{current_data['weather'][0]['icon']}}@2x.png" alt="{{current_data['weather'][0]['main']}}" title="{{current_data['weather'][0]['main']}}"></td></tr>
             </table>
             {% if img %}
-            <a><img src="{{img['photos'][0]['src']['tiny']}}" alt="{{img['photos'][0]['alt']}}"></a>
+            <div id="img">
+                <a href="{{img['photos'][0]['url']}}" target="_blank"><img src="{{img['photos'][0]['src']['tiny']}}" alt="{{img['photos'][0]['alt']}}"></a>
+                <p>This photo was taken by <a href="{{img['photos'][0]['photographer_url']}}" target="_blank">{{img['photos'][0]['photographer']}}</a> on <a href="https://www.pexels.com" target="_blank">Pexels</a></p>
+            </div>
             {% endif %}
         </section>
         <div class="data">
@@ -62,6 +65,9 @@
                     {% endfor %}
                 </table>
             </section>
+        </div>
+        <div>
+            <h2></h2>
         </div>
     <script>
         function select(selector) {

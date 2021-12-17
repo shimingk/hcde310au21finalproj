@@ -93,6 +93,15 @@ def get_city_img(city):
     return None
 
 
+# Takes in a string of words and return a capitalized/formatted version of the words as a string
+def format_words(words):
+    words = words.split()
+    for word in range(len(words)):
+        capitalized = words[word][0].upper() + words[word][1:].lower()
+        words[word] = capitalized
+    return " ".join(words)
+
+
 @app.route("/", methods=["GET", "POST"])
 def main_route():
     app.logger.info("In main route")
@@ -131,10 +140,10 @@ def main_route():
             for day in range(len(altdata['daily'])):
                 data['daily'][day]['cel'] = altdata['daily'][day]['temp']
             img_dt = get_city_img(name)
-            # print(img_dt)
-            # print(img_dt.keys())
+            print(img_dt)
+            print(img_dt.keys())
             # print(data['daily'])
-            title = "Weather data for %s" % name
+            title = "Weather for %s" % format_words(name)
             if (data is not None) & (img_dt is not None):
                 return render_template("index.html", page_title=title, current_data=data['current'],
                                        forecast=data['daily'], past_data=past_data, img=img_dt)
@@ -164,6 +173,13 @@ def main():
     print(data)
     # print(len((data["daily"][0])))
     # print(get_weather_icon(data["current"]["weather"][0]["icon"]))
+    print(format_words("LOS angeLES"))
+    print(format_words("seaTTLe"))
+    print(format_words("chiCaGo"))
+    print(format_words("new YORK"))
+    print(format_words("salT LaKe City"))
+    slt = get_coordinates("salT LaKe City")
+    print(slt)
 
 
 if __name__ == "__main__":

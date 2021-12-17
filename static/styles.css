@@ -23,6 +23,14 @@ body, td {
     margin: 5px;
 }
 
+#img {
+    flex-direction: column;
+}
+
+#img p {
+    margin: 5px;
+}
+
 #err {
     padding: 25px;
     margin: 25px;
