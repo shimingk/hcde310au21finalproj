@@ -80,3 +80,7 @@ body, td {
     background-color: #DEB6AA;
     transition-duration: 500ms;
 }
+
+#analyze span {
+    font-weight: bold;
+}

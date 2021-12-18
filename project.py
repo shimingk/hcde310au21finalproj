@@ -1,10 +1,7 @@
-# import sys
 from flask import Flask, render_template, request
-import json, urllib, requests, calendar, datetime, logging
+import json, urllib, requests, datetime, logging
 from keys import weather_key, pxl_key
 
-# sys.path.append('/users/shi ming/appdata/local/programs/python/python39/lib/site-packages')
-# from requests_oauthlib import OAuth1
 
 app = Flask(__name__)
 
@@ -32,7 +29,6 @@ def get_coordinates(city):
         return None
     else:
         weather_data = json.load(req_weather_data)
-        # print(weather_data)
         return weather_data["coord"]["lat"], weather_data["coord"]["lon"]
 
 
@@ -48,11 +44,6 @@ def get_weather_data(coordinates, units):
     req = safe_get(baseurl + paramstr)
     return json.load(req)
 
-
-# def current_timestamp():
-#     date = datetime.datetime.utcnow()
-#     utc_time = calendar.timegm(date.utctimetuple())
-#     return utc_time
 
 # Takes in a unix timestamp and returns its corresponding date formatted: MM-DD-YYYY
 def convert_time(dt):
@@ -109,7 +100,6 @@ def take_forecast_avg(data):
     for day in range(7):
         total_c += data[day]["cel"]["day"]
         total_f += data[day]["temp"]["day"]
-    print()
     return round(total_f / 7, 2), round(total_c / 7, 2)
 
 
@@ -120,8 +110,12 @@ def take_past_avg(data):
     for day in data:
         total_c += day["cel"]
         total_f += day["temp"]
-    print()
     return round(total_f / 5, 2), round(total_c / 5, 2)
+
+
+# Takes in two numbers and returns the relative change of the first number to the second
+def calc_rel_change(x, y):
+    return round(((x - y) / y) * 100, 2)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -138,7 +132,6 @@ def main_route():
             curr_time = data['current']['dt']
             data['current']['date'] = convert_time(curr_time)
             data['current']['day'] = convert_day(curr_time)
-            print(data['current']['day'])
             past_data = []
             for day in range(5, 0, -1):
                 day_data = get_past_weather_data(location, "imperial", curr_time - (day * 86400))['current']
@@ -147,11 +140,6 @@ def main_route():
                 day_data['cel'] = get_past_weather_data(
                     location, "metric", curr_time - (day * 86400))['current']['temp']
                 past_data.append(day_data)
-            print(past_data[0])
-            print()
-            print(len(data['current']))
-            print(data['current'])
-            print()
             del data['daily'][0]
             for day in data['daily']:
                 day['date'] = convert_time(day['dt'])
@@ -162,11 +150,17 @@ def main_route():
             img_dt = get_city_img(name)
             forecast_avg = take_forecast_avg(data["daily"])
             past_avg = take_past_avg(past_data)
+            curr_temp = data["current"]["temp"]
+            curr_temp_alt = data["current"]["cel"]
             analytics = {
                 "forecast_avg": forecast_avg,
-                "past_avg": past_avg
+                "past_avg": past_avg,
+                "diff": {
+                    "curr_past": [round(curr_temp - past_avg[0], 2), round(curr_temp_alt - past_avg[1], 2)],
+                    "curr_forecast": [round(forecast_avg[0] - curr_temp, 2), round(forecast_avg[1] - curr_temp_alt, 2)],
+                    "past_forecast": [round(forecast_avg[0] - past_avg[0], 2), round(forecast_avg[1] - past_avg[1], 2)]
+                }
             }
-
             title = "Weather for %s" % format_words(name)
             if (data is not None) & (img_dt is not None):
                 return render_template("index.html", page_title=title, current_data=data['current'],
@@ -184,28 +178,5 @@ def main_route():
         return render_template("index.html", page_title="Home")
 
 
-@app.route("/analysis")
-def input_route():
-    pass
-
-
-def main():
-    coordinates = get_coordinates("seaTTLe")
-    print(coordinates[0], coordinates[1])
-    data = get_weather_data(coordinates, "imperial")
-    print(data.keys())
-    print(data)
-    # print(len((data["daily"][0])))
-    # print(get_weather_icon(data["current"]["weather"][0]["icon"]))
-    print(format_words("LOS angeLES"))
-    print(format_words("seaTTLe"))
-    print(format_words("chiCaGo"))
-    print(format_words("new YORK"))
-    print(format_words("salT LaKe City"))
-    slt = get_coordinates("salT LaKe City")
-    print(slt)
-
-
 if __name__ == "__main__":
-    # main()
     app.run(host="localhost", port=8080, debug=True)

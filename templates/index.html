@@ -5,7 +5,7 @@
         <title>Simple Weather</title>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
     </head>
-    <body>
+    <body onload="load()">
         <h1><a href="/">Simple Weather</a></h1>
         <form action="/" method="post">
             <label for="place">Please enter your city:</label><br>
@@ -24,10 +24,10 @@
                 <tr><td><img src="http://openweathermap.org/img/wn/{{current_data['weather'][0]['icon']}}@2x.png" alt="{{current_data['weather'][0]['main']}}" title="{{current_data['weather'][0]['main']}}"></td></tr>
             </table>
             {% if img %}
-            <div id="img">
+            <figure id="img">
                 <a href="{{img['photos'][0]['url']}}" target="_blank"><img src="{{img['photos'][0]['src']['tiny']}}" alt="{{img['photos'][0]['alt']}}"></a>
-                <p>This photo was taken by <a href="{{img['photos'][0]['photographer_url']}}" target="_blank">{{img['photos'][0]['photographer']}}</a> on <a href="https://www.pexels.com" target="_blank">Pexels</a></p>
-            </div>
+                <figcaption>This photo was taken by <a href="{{img['photos'][0]['photographer_url']}}" target="_blank">{{img['photos'][0]['photographer']}}</a> on <a href="https://www.pexels.com" target="_blank">Pexels</a></figcaption>
+            </figure>
             {% endif %}
         </section>
         <div class="data">
@@ -66,11 +66,28 @@
                 </table>
             </section>
             <div id="analyze">
-                <h2>Looking at the results...</h2>
-                <p>Average Temperature for the 7-day forecast</p>
-                <p><span id="avg_forecast">{{more['forecast_avg'][0]}}</span><sup>o</sup><a class="units" onclick="toggleTemp()">F</a></p>
-                <p>Average Temperature for the past 5 days</p>
-                <p><span id="avg_past">{{more['past_avg'][0]}}</span><sup>o</sup><a class="units" onclick="toggleTemp()">F</a></p>
+                <h2><button class="toggle" onclick="toggle(&quot;#info&quot;)">Looking at the results...</button></h2>
+                <div id="info">
+                    <p>Average Temperature for the 7-day forecast</p>
+                    <p><span id="avg_forecast">{{more['forecast_avg'][0]}}</span><sup>o</sup><a class="units" onclick="toggleTemp()">F</a></p>
+                    <p>Average Temperature for the past 5 days</p>
+                    <p><span id="avg_past">{{more['past_avg'][0]}}</span><sup>o</sup><a class="units" onclick="toggleTemp()">F</a></p>
+                    <p>
+                        Comparing the temperature average from the past 5 days<br> with the current temperature, there is a
+                    </p>
+                    <p><span id="curr_past">{{more["diff"]["curr_past"][0]}}</span><sup>o</sup></p>
+                    <p><span class="change"></span> in temperature.</p>
+                    <p>
+                        Comparing the average temperature of the 7-day forecast<br> with the current temperature, there is a projected
+                    </p>
+                    <p><span id="curr_forecast">{{more["diff"]["curr_forecast"][0]}}</span><sup>o</sup></p>
+                    <p><span class="change"></span> in temperature.</p>
+                    <p>
+                        Comparing the average temperatures of the forecast<br> and the past 5 days, there is a projected
+                    </p>
+                    <p><span id="past_forecast">{{more["diff"]["past_forecast"][0]}}</span><sup>o</sup></p>
+                    <p><span class="change"></span> in temperature.</p>
+                </div>
             </div>
         </div>
     <script>
@@ -125,9 +142,16 @@
             historicData = selectAll("#past span")
             avgForecast = id("avg_forecast");
             avgPast = id("avg_past");
+            currPast = id("curr_past");
+            currFore = id("curr_forecast");
+            pastFore = id("past_forecast");
             if (units === "C") {
                 avgForecast.innerHTML = {{more['forecast_avg'][1]}};
                 avgPast.innerHTML = {{more['past_avg'][1]}};
+                currPast.innerHTML = {{more['diff']['curr_past'][1]}};
+                currFore.innerHTML = {{more['diff']['curr_forecast'][1]}};
+                pastFore.innerHTML = {{more['diff']['past_forecast'][1]}};
+                change(".change");
                 {% for day in range(7) %}
                 forecastData[{{day}}].innerHTML = {{forecast[day]['cel']['day']}};
                 {% endfor %}
@@ -137,12 +161,36 @@
             } else {
                 avgForecast.innerHTML = {{more['forecast_avg'][0]}};
                 avgPast.innerHTML = {{more['past_avg'][0]}};
+                currPast.innerHTML = {{more['diff']['curr_past'][0]}};
+                currFore.innerHTML = {{more['diff']['curr_forecast'][0]}};
+                pastFore.innerHTML = {{more['diff']['past_forecast'][0]}};
+                change(".change");
                 {% for day in range(7) %}
                 forecastData[{{day}}].innerHTML = {{forecast[day]['temp']['day']}};
                 {% endfor %}
                 {% for day in range(5) %}
                 historicData[{{day}}].innerHTML = {{past_data[day]['temp']}};
                 {% endfor %}
+            }
+        }
+
+        function load() {
+            change(".change");
+        }
+
+        function change(name) {
+            elements = selectAll(name);
+            for (let i = 0; i < elements.length; i++) {
+                prev = elements[i].parentNode.previousElementSibling.firstElementChild;
+                first = prev.innerHTML[0];
+                if (prev.innerHTML === "0.00") {
+                    elements[i].innerHTML = "change";
+                } else if (first === "-") {
+                    elements[i].innerHTML = "decrease";
+                    prev.innerHTML = prev.innerHTML.slice(1);
+                } else {
+                    elements[i].innerHTML = "increase";
+                }
             }
         }
     </script>
