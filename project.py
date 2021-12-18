@@ -102,19 +102,39 @@ def format_words(words):
     return " ".join(words)
 
 
+# Takes in forecast data and returns the average temperature in degrees F and C, respectively
+def take_forecast_avg(data):
+    total_f = 0.0
+    total_c = 0.0
+    for day in range(7):
+        total_c += data[day]["cel"]["day"]
+        total_f += data[day]["temp"]["day"]
+    print()
+    return round(total_f / 7, 2), round(total_c / 7, 2)
+
+
+# Takes in past weather data and returns the average temperature in degrees F and C, respectively
+def take_past_avg(data):
+    total_f = 0.0
+    total_c = 0.0
+    for day in data:
+        total_c += day["cel"]
+        total_f += day["temp"]
+    print()
+    return round(total_f / 5, 2), round(total_c / 5, 2)
+
+
 @app.route("/", methods=["GET", "POST"])
 def main_route():
     app.logger.info("In main route")
     if request.method == "POST":
         app.logger.info(request.form.get("place"))
         name = request.form.get("place")
-        # app.logger.info(name)
         if get_coordinates(name) is not None:
             location = get_coordinates(name)
             data = get_weather_data(location, "imperial")
             altdata = get_weather_data(location, "metric")
             data['current']['cel'] = get_weather_data(location, "metric")['current']['temp']
-            # print('celsius:', data['current']['cel'])
             curr_time = data['current']['dt']
             data['current']['date'] = convert_time(curr_time)
             data['current']['day'] = convert_day(curr_time)
@@ -140,22 +160,26 @@ def main_route():
             for day in range(len(altdata['daily'])):
                 data['daily'][day]['cel'] = altdata['daily'][day]['temp']
             img_dt = get_city_img(name)
-            print(img_dt)
-            print(img_dt.keys())
-            # print(data['daily'])
+            forecast_avg = take_forecast_avg(data["daily"])
+            past_avg = take_past_avg(past_data)
+            analytics = {
+                "forecast_avg": forecast_avg,
+                "past_avg": past_avg
+            }
+
             title = "Weather for %s" % format_words(name)
             if (data is not None) & (img_dt is not None):
                 return render_template("index.html", page_title=title, current_data=data['current'],
-                                       forecast=data['daily'], past_data=past_data, img=img_dt)
+                                       forecast=data['daily'], past_data=past_data, img=img_dt, more=analytics)
             elif data is not None:
                 return render_template("index.html", page_title=title, current_data=data['current'],
-                                       forecast=data['daily'], past_data=past_data)
+                                       forecast=data['daily'], past_data=past_data, more=analytics)
             else:
                 return render_template("index.html", page_title="Simple Weather - Error",
                                        prompt="Oh no! API call was unsuccessful")
         else:
             return render_template("index.html", page_title="home",
-                                   prompt="City name invalid! Please try again")
+                                   prompt="City name invalid! Please try again.")
     else:
         return render_template("index.html", page_title="Home")
 

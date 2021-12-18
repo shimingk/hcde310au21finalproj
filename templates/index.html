@@ -8,9 +8,9 @@
     <body>
         <h1><a href="/">Simple Weather</a></h1>
         <form action="/" method="post">
-            <label for="place">Please enter the city:</label><br>
-            <input type="text" id="place" name="place" required/><br/>
-            <input type="submit" value="Enter" name="enterbtn"/>
+            <label for="place">Please enter your city:</label><br>
+            <input type="text" id="place" name="place" placeholder="ex: Seattle, Chicago" required/><br/>
+            <input type="submit" id="form-btn" value="Enter" name="enterbtn"/>
         </form>
         {% if prompt %}
         <div id="err">{{prompt}}</div>
@@ -31,25 +31,8 @@
             {% endif %}
         </section>
         <div class="data">
-            <section id="forecast">
-                <h3>7-day Forecast</h3>
-                <table>
-                    <tr>
-                        <th scope="col">Day</th>
-                        <th scope="col">Temperature</th>
-                        <th scope="col">Weather</th>
-                    </tr>
-                    {% for day in forecast %}
-                    <tr>
-                        <td>{{day['day']}}<br>{{day['date']}}</td>
-                        <td class="temp"><span>{{day['temp']['day']}}</span><sup>o</sup><a class="units" onclick="toggleTemp()">F</a></td>
-                        <td><img src="http://openweathermap.org/img/wn/{{day['weather'][0]['icon']}}@2x.png" alt="{{day['weather'][0]['main']}}" title="{{day['weather'][0]['main']}}"></td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </section>
             <section id="past">
-                <h3>Past 5 Days</h3>
+                <h3><button class="toggle" onclick="toggle(&quot;#past table&quot;)">Past 5 Days</button></h3>
                 <table>
                     <tr>
                         <th scope="col">Day</th>
@@ -65,9 +48,30 @@
                     {% endfor %}
                 </table>
             </section>
-        </div>
-        <div>
-            <h2></h2>
+            <section id="forecast">
+                <h3><button class="toggle" onclick="toggle(&quot;#forecast table&quot;)">7-day Forecast</button></h3>
+                <table>
+                    <tr>
+                        <th scope="col">Day</th>
+                        <th scope="col">Temperature</th>
+                        <th scope="col">Weather</th>
+                    </tr>
+                    {% for day in forecast %}
+                    <tr>
+                        <td>{{day['day']}}<br>{{day['date']}}</td>
+                        <td class="temp"><span>{{day['temp']['day']}}</span><sup>o</sup><a class="units" onclick="toggleTemp()">F</a></td>
+                        <td><img src="http://openweathermap.org/img/wn/{{day['weather'][0]['icon']}}@2x.png" alt="{{day['weather'][0]['main']}}" title="{{day['weather'][0]['main']}}"></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </section>
+            <div id="analyze">
+                <h2>Looking at the results...</h2>
+                <p>Average Temperature for the 7-day forecast</p>
+                <p><span id="avg_forecast">{{more['forecast_avg'][0]}}</span><sup>o</sup><a class="units" onclick="toggleTemp()">F</a></p>
+                <p>Average Temperature for the past 5 days</p>
+                <p><span id="avg_past">{{more['past_avg'][0]}}</span><sup>o</sup><a class="units" onclick="toggleTemp()">F</a></p>
+            </div>
         </div>
     <script>
         function select(selector) {
@@ -80,6 +84,15 @@
 
         function id(name) {
             return document.getElementById(name);
+        }
+
+        function toggle(name) {
+            element = select(name);
+            if (element.style.display === "none") {
+                element.style.display = "block";
+            } else {
+                element.style.display = "none";
+            }
         }
 
         function toggleTemp() {
@@ -110,7 +123,11 @@
         function toggleOthers(units) {
             forecastData = selectAll("#forecast span")
             historicData = selectAll("#past span")
+            avgForecast = id("avg_forecast");
+            avgPast = id("avg_past");
             if (units === "C") {
+                avgForecast.innerHTML = {{more['forecast_avg'][1]}};
+                avgPast.innerHTML = {{more['past_avg'][1]}};
                 {% for day in range(7) %}
                 forecastData[{{day}}].innerHTML = {{forecast[day]['cel']['day']}};
                 {% endfor %}
@@ -118,6 +135,8 @@
                 historicData[{{day}}].innerHTML = {{past_data[day]['cel']}};
                 {% endfor %}
             } else {
+                avgForecast.innerHTML = {{more['forecast_avg'][0]}};
+                avgPast.innerHTML = {{more['past_avg'][0]}};
                 {% for day in range(7) %}
                 forecastData[{{day}}].innerHTML = {{forecast[day]['temp']['day']}};
                 {% endfor %}

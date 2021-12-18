@@ -1,4 +1,4 @@
-body {
+body , .toggle {
     background-color: #AAD2DE;
     font-family: 'Open Sans', Arial, sans-serif;
 }
@@ -7,10 +7,35 @@ body, td {
     text-align: center;
 }
 
+#place {
+    padding: 15px;
+    margin: 5px;
+    display: inline-block;
+    border-radius: 5px;
+    border:  2px solid;
+    width: 20%;
+    height: 100%;
+}
+
+#form-btn {
+    width: 20%;
+    background-color: #DEB6AA;
+    color: white;
+    padding: 5px;
+    margin: 5px;
+    border-radius: 5px;
+}
+
+#form-btn:hover {
+    cursor: pointer;
+    outline-color: #AADED0;
+    color: #AADED0;
+}
+
 .units:hover {
     cursor: pointer;
     outline-style: groove;
-    outline-color: aquamarine;
+    outline-color: #DEB6AA;
 }
 
 #current {
@@ -39,4 +64,19 @@ body, td {
 .data {
     display: flex;
     justify-content: space-evenly;
+}
+
+.toggle {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    width: auto;
+    font-size: large;
+    font-weight: bold;
+    border-radius: 50%;
+}
+
+.toggle:hover {
+    background-color: #DEB6AA;
+    transition-duration: 500ms;
 }
